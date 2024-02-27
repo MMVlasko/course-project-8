@@ -1,4 +1,4 @@
-def find_eulerian_tour(gr, start):
+def nonorient_euler(gr, start):
     stack = []
     tour = []
 
@@ -32,6 +32,7 @@ def get_edge_and_index(v, gr):
             return i, gr[i]
 
 
-graph = [(0, 1), (1, 5), (5, 0)]
+if __name__ == '__main__':
+    graph = [(0, 1), (1, 5), (5, 0)]
 
-print((find_eulerian_tour(graph, 5)))
+    print((nonorient_euler(graph, 5)))
