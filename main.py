@@ -25,7 +25,7 @@ def main():
 
     def build(mode=None):
         nonlocal canvas, euler_button, euler_speech, euler_entry
-        if euler_button is not None and mode is None:
+        if mode is None:
             euler_button.destroy()
             euler_speech.destroy()
             euler_entry.destroy()
@@ -45,26 +45,42 @@ def main():
                         vs.append((i + 1, j + 1))
 
             if all(tuple(reversed(i)) in vs for i in vs):
-                msg += 'Введён неориентированный граф.\n'
+                msg += 'Введён неориентированный граф.\n\n'
                 vs = list(set([tuple(sorted(i)) for i in vs]))
-                can = all(not sum(i) % 2 for i in data)
+                can, start, end = all(not sum(i) % 2 for i in data), None, None
                 if not can:
-                    msg += 'Невозможно построить Эйлеров цикл в данном графе!'
-                if mode is not None:
+                    if sum(sum(i) % 2 for i in data) == 2:
+                        start, end = [i + 1 for i in range(len(data)) if sum(data[i]) % 2]
+                        msg += f'В данном графе существует\nэйлеров путь из {start} в {end}.\n\n'
+                        state = 'non-orient_way'
+                    else:
+                        msg += 'Невозможно построить Эйлеров цикл в данном графе!'
+                        state = 'fail'
+                else:
+                    state = 'non-orient_cycle'
+                if mode == 'cycle':
                     eu = int(euler_entry.get())
                     tour = nonorient_euler(vs, eu if eu <= len(data) else 1)
+                elif mode == 'way':
+                    print(vs)
+                    vs.remove((start, end))
+                    tour = nonorient_euler(vs, start) + [end]
+                    print(tour)
 
             else:
-                msg += 'Введён ориентированный граф.\n'
+                msg += 'Введён ориентированный граф.\n\n'
                 can = all(sum(data[i]) == sum(data[j][i] for j in range(len(data))) for i in range(len(data)))
                 if not can:
+                    state = 'fail'
                     msg += 'Невозможно построить Эйлеров\nцикл в данном орграфе!'
-                if mode is not None:
+                else:
+                    state = 'orient_cycle'
+                if mode == 'cycle':
                     eu = int(euler_entry.get())
                     tour = orient_euler(vs, eu if eu <= len(data) else 1)
             if mode is None:
-                state_label.configure(text=f'{msg}{"\nПостроить:" if len(msg) < 35 else ""}')
-                if len(msg) < 35:
+                state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
+                if state in ('orient_cycle', 'non-orient_cycle'):
                     euler_button = ttk.Button(window, text='Эйлеров цикл', command=lambda: build(mode='cycle'))
                     euler_button.place(x=400, y=380)
 
@@ -74,6 +90,9 @@ def main():
                     euler_entry = tkinter.Entry(window, width=5)
                     euler_entry.place(x=470, y=437)
                     euler_entry.insert(0, '1')
+                elif state == 'non-orient_way':
+                    euler_button = ttk.Button(window, text='Эйлеров путь', command=lambda: build(mode='way'))
+                    euler_button.place(x=400, y=420)
             else:
                 tour = [(tour[i], tour[i + 1]) for i in range(len(tour) - 1)]
 
@@ -100,7 +119,7 @@ def main():
             graph(data, base=draw, stop=stop, tour=tour)
             if not stop.stop:
                 err_label.configure(text='Завершено.', fg='green')
-        except ValueError:
+        except ImportError:
             err_label.configure(text='Ошибка!', fg='red')
             state_label.configure(text='Введены не числовые значения!')
             return
@@ -110,9 +129,9 @@ def main():
     window.title('Эйлеровы и Гамильтоновы пути (циклы)')
     window.protocol('WM_DELETE_WINDOW', close)
 
-    euler_button = None
-    euler_speech = None
-    euler_entry = None
+    euler_button = tkinter.Entry()
+    euler_speech = tkinter.Entry()
+    euler_entry = tkinter.Entry()
 
     canvas = tkinter.Canvas(master=window, width=350, height=600)
     canvas.place(x=20, y=20)
