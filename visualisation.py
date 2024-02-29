@@ -66,11 +66,11 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
     if step is not None:
         if step[0] == 'l':
             base.left(90)
-            base.forward(25)
+            base.forward(30)
             base.right(90)
         else:
             base.right(90)
-            base.forward(25)
+            base.forward(30)
             base.left(90)
         base.color('red')
         base.write(
@@ -82,11 +82,11 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
         base.color(bg)
         if step[0] == 'r':
             base.left(90)
-            base.forward(25)
+            base.forward(30)
             base.right(90)
         else:
             base.right(90)
-            base.forward(25)
+            base.forward(30)
             base.left(90)
 
     base.right(180 - out)
@@ -96,7 +96,7 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
         base.pendown()
 
 
-def graph(data, base=None, stop=None, tour=None):
+def graph(data, base=None, stop=None, tour=None, info_tour=None):
     number = len(data)
     graphs = list(range(1, number + 1))
     memory = []
@@ -280,7 +280,25 @@ def graph(data, base=None, stop=None, tour=None):
             base.right(180)
         elif item % 4 == 2:
             base.left(90)
+        base.forward(20)
+        if item != number - 1:
+            base.forward(120)
+        elif info_tour:
+            base.forward(30)
+            if item % 4 in (0, 3):
+                base.left(90)
+                base.forward(80)
+                base.left(90)
+            else:
+                base.right(90)
+                base.forward(80)
+                base.right(90)
+            base.write(
+                ' - '.join(map(str, info_tour)),
+                False,
+                font=('Times New Roman', 11, 'bold'),
+                align='center'
+            )
 
-        base.forward(140)
         base.pendown()
         graphs[item] = 0

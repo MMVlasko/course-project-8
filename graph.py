@@ -28,8 +28,7 @@ def get_degree(v, gr):
 
 def get_edge_and_index(v, gr, warn):
     for i in range(len(gr)):
-        print(gr[i], (v == gr[i][0] or v == gr[i][1]), gr[i] != warn)
-        if (v == gr[i][0] or v == gr[i][1]) and not (v == gr[i][0] and gr[i] != warn):
+        if (v == gr[i][0] or v == gr[i][1]) and not (v == gr[i][0] and gr[i] == warn):
             return i, gr[i]
 
 
