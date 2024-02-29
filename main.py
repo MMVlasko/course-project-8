@@ -77,8 +77,8 @@ def main():
                 msg += 'Введён ориентированный граф.\n\n'
                 can = all(sum(data[i]) == sum(data[j][i] for j in range(len(data))) for i in range(len(data)))
                 if not can:
-                    if sum((sum(data[i]) + sum(data[j][i] for j in range(
-                            len(data)))) % 2 for i in range(len(data))) == 2:
+                    if sum((sum(data[i]) != sum(data[j][i] for j in range(len(data)))) for i in range(len(data))) == 2:
+                        print([sum(data[i]) + sum(data[j][i] for j in range(len(data))) % 2 for i in range(len(data))])
                         start, end = [i + 1 for i in range(len(data)) if (
                                 sum(data[i]) + sum(data[j][i] for j in range(len(data)))) % 2]
                         msg += f'В данном графе существует\nэйлеров путь из {start} в {end}.\n\n'
