@@ -114,10 +114,10 @@ def graph(data, base=None, stop=None, tour=None):
             inp = 270
         elif item % 4 == 3:
             inp = 90
-
+        marks = [str(i + 1) for i in range(len(tour)) if tour[i][0] == item + 1]
         peak(item + 1, inp=inp if item else 0, end='up', out=0, draw=graphs[item], base=base,
              step=('l' if item % 4 in (0, 3) else 'r',
-                   [str(i + 1) for i in range(len(tour)) if tour[i][0] == item + 1]))
+                   marks + ([str(len(tour) + 1)] if item + 1 == tour[-1][1] else []) if tour else []))
 
         for pk in range(number):
 

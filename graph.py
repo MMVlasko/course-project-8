@@ -1,4 +1,4 @@
-def nonorient_euler(gr, start):
+def nonorient_euler(gr, start, warn=(0, 0)):
     stack = []
     tour = []
 
@@ -12,7 +12,7 @@ def nonorient_euler(gr, start):
             stack.pop()
             tour.append(v)
         else:
-            index, edge = get_edge_and_index(v, gr)
+            index, edge = get_edge_and_index(v, gr, warn=warn)
             gr.pop(index)
             stack.append(edge[1] if v == edge[0] else edge[0])
     return tour
@@ -26,9 +26,10 @@ def get_degree(v, gr):
     return degree
 
 
-def get_edge_and_index(v, gr):
+def get_edge_and_index(v, gr, warn):
     for i in range(len(gr)):
-        if v == gr[i][0] or v == gr[i][1]:
+        print(gr[i], (v == gr[i][0] or v == gr[i][1]), gr[i] != warn)
+        if (v == gr[i][0] or v == gr[i][1]) and not (v == gr[i][0] and gr[i] != warn):
             return i, gr[i]
 
 

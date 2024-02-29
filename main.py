@@ -62,10 +62,9 @@ def main():
                     eu = int(euler_entry.get())
                     tour = nonorient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
-                    print(vs)
-                    vs.remove((start, end))
-                    tour = nonorient_euler(vs, start) + [end]
-                    print(tour)
+                    vs += [(start, end)] if (start, end) not in vs else []
+                    tour = nonorient_euler(vs, start, warn=(start, end))
+                    tour.pop(-1)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
