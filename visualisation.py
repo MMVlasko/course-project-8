@@ -1,34 +1,29 @@
 from math import asin, degrees, cos, radians
 
 
-def center_window(roots, x_width, height):
-    x_window_height = height
-    x_window_width = x_width
+def center_window(root, width, height):
+    x = int((root.winfo_screenwidth() / 2) - (width / 2))
+    y = int((root.winfo_screenheight() / 2) - (height / 2))
 
-    screen_width = roots.winfo_screenwidth()
-    screen_height = roots.winfo_screenheight()
-
-    x_coordinate = int((screen_width / 2) - (x_window_width / 2))
-    y_coordinate = int((screen_height / 2) - (x_window_height / 2))
-
-    roots.geometry(f'{x_window_width}x{x_window_height}+{x_coordinate}+{y_coordinate}')
+    root.geometry(f'{width}x{height}+{x}+{y}')
 
 
-def pointer(col='black', base=None):
-    base.pendown()
-    base_col = base.pencolor()
-    base.pencolor(col)
-    base.begin_fill()
-    base.left(150)
-    base.forward(15)
-    base.left(120)
-    base.forward(15)
-    base.left(120)
-    base.forward(15)
-    base.right(30)
-    base.end_fill()
-    base.pencolor(base_col)
-    base.penup()
+def pointer(col='black', base=None, draw=True):
+    if draw:
+        base.pendown()
+        base_col = base.pencolor()
+        base.pencolor(col)
+        base.begin_fill()
+        base.left(150)
+        base.forward(15)
+        base.left(120)
+        base.forward(15)
+        base.left(120)
+        base.forward(15)
+        base.right(30)
+        base.end_fill()
+        base.pencolor(base_col)
+        base.penup()
 
 
 def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=None, step=None):
@@ -96,7 +91,7 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
         base.pendown()
 
 
-def graph(data, base=None, stop=None, tour=None, info_tour=None):
+def graph(data, base=None, stop=None, tour=None, nor=None):
     number = len(data)
     graphs = list(range(1, number + 1))
     memory = []
@@ -139,7 +134,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                             if p():
                                 base.pendown()
                             base.forward(120 * abs(delta))
-                            pointer(base=base, col=color)
+                            pointer(base=base, col=color, draw=nor or color == 'red')
                             base.right(90)
                             peak(pk + 1, draw=graphs[pk], base=base)
                             base.penup()
@@ -149,7 +144,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                             if p():
                                 base.pendown()
                             base.forward(120 * delta)
-                            pointer(base=base, col=color)
+                            pointer(base=base, col=color, draw=nor or color == 'red')
                             peak(pk + 1, inp=180, out=180, draw=graphs[pk], base=base)
                             base.penup()
                             base.forward(120 * delta)
@@ -173,7 +168,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                             base.forward((abs(delta) - 2) * 160)
                             base.right(angle) if delta < 0 else base.left(angle)
                             base.forward(160 // way - 20)
-                            pointer(base=base, col=color)
+                            pointer(base=base, col=color, draw=nor or color == 'red')
                             peak(pk + 1, inp=360 - s_angle, out=360 - s_angle, draw=graphs[pk],
                                  base=base)
                             base.penup()
@@ -194,7 +189,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                             base.forward((abs(delta) - 2) * 160)
                             base.left(angle) if delta < 0 else base.right(angle)
                             base.forward(160 // way - 20)
-                            pointer(base=base, col=color)
+                            pointer(base=base, col=color, draw=nor or color == 'red')
                             peak(pk + 1, inp=s_angle, out=s_angle, draw=graphs[pk], base=base)
                             base.penup()
                             base.forward(160 // way - 20)
@@ -218,7 +213,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                     if p():
                         base.pendown()
                     base.forward(120)
-                    pointer(base=base, col=color)
+                    pointer(base=base, col=color, draw=nor or color == 'red')
                     if item % 4 in (0, 3):
                         peak(pk + 1, inp=270, out=270, draw=graphs[pk], base=base)
                     else:
@@ -247,7 +242,7 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
                     if p():
                         base.pendown()
                     base.forward(int(((abs(delta) * 160) ** 2 + 160 ** 2) ** 0.5 - 40))
-                    pointer(base=base, col=color)
+                    pointer(base=base, col=color, draw=nor or color == 'red')
                     if delta > 0 and item % 4 in (0, 3):
                         peak(pk + 1, inp=270 - angle, out=270 - angle, draw=graphs[pk], base=base)
                     elif delta > 0 and item % 4 in (1, 2):
@@ -283,22 +278,6 @@ def graph(data, base=None, stop=None, tour=None, info_tour=None):
         base.forward(20)
         if item != number - 1:
             base.forward(120)
-        elif info_tour:
-            base.forward(30)
-            if item % 4 in (0, 3):
-                base.left(90)
-                base.forward(80)
-                base.left(90)
-            else:
-                base.right(90)
-                base.forward(80)
-                base.right(90)
-            base.write(
-                ' - '.join(map(str, info_tour)),
-                False,
-                font=('Times New Roman', 11, 'bold'),
-                align='center'
-            )
 
         base.pendown()
         graphs[item] = 0

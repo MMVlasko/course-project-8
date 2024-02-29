@@ -1,14 +1,12 @@
 def orient_euler(gr, start):
-    stack = []
-    tour = []
+    stack, tour = [], []
 
     stack.append(start)
     while len(stack) > 0:
         v = stack[-1]
-
         degree = get_degree(v, gr)
 
-        if degree == 0:
+        if not degree:
             stack.pop()
             tour.append(v)
         else:
@@ -23,7 +21,6 @@ def get_degree(v, gr):
     for (x, y) in gr:
         if v == x:
             degree += 1
-
     return degree
 
 
@@ -31,9 +28,3 @@ def get_edge_and_index(v, gr):
     for i in range(len(gr)):
         if v == gr[i][0]:
             return i, gr[i]
-
-
-if __name__ == '__main__':
-    graph = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 2), (2, 6), (6, 0)]
-
-    print((orient_euler(graph, 4)))
