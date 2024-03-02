@@ -1,4 +1,6 @@
 def not_orient_euler(graph, start, warn=(0, 0)):
+    if len(graph) == 1:
+        return list(graph[0]) + [graph[0][0]]
     stack, tour = [], []
     stack.append(start)
 

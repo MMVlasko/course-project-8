@@ -8,6 +8,7 @@ import os.path
 from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
+from hamilton import hamilton_way
 
 
 class Stop:
@@ -24,6 +25,7 @@ class Main:
         self.euler_button = Entry()
         self.euler_speech = Entry()
         self.euler_entry = Entry()
+        self.hamilton_button = Entry()
 
         self.canvas = Canvas(master=self.window, width=500, height=640)
         self.canvas.place(x=20, y=20)
@@ -57,15 +59,16 @@ class Main:
         self.speed.place(x=625, y=55)
         self.speed.insert(0, '0')
 
-        self.d = RawTurtle(self.canvas)
-        self.d.hideturtle()
-        self.d.write('GRAPH\'S VISUALISATION WELCOME YOU!', align='center')
+        d = RawTurtle(self.canvas)
+        d.hideturtle()
+        d.write('GRAPH\'S VISUALISATION WELCOME YOU!', align='center')
 
     def build(self, mode=None):
         if mode is None:
             self.euler_button.destroy()
             self.euler_speech.destroy()
             self.euler_entry.destroy()
+            self.hamilton_button.destroy()
 
         try:
             data = [list(map(int, i.split())) for i in self.text.get(0.0, 'end').split('\n') if i]
@@ -103,6 +106,7 @@ class Main:
                         state = 'fail'
                 else:
                     state = 'cycle'
+
                 if mode == 'cycle':
                     eu = int(self.euler_entry.get())
                     tour = not_orient_euler(vs, eu if eu <= len(data) else 1)
@@ -110,6 +114,8 @@ class Main:
                     vs = ([(end, start)] if (start, end) not in vs else []) + vs
                     tour = not_orient_euler(vs, start, warn=(start, end))
                     tour.pop(-1)
+                elif mode == 'ham':
+                    tour = hamilton_way(vs)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
@@ -126,18 +132,21 @@ class Main:
                         msg += 'Невозможно построить Эйлеров\nцикл в данном орграфе!'
                 else:
                     state = 'cycle'
+
                 if mode == 'cycle':
                     eu = int(self.euler_entry.get())
                     tour = orient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
                     vs += [(end, start)] if ((end, start) not in vs and (start, end) not in vs) else []
                     tour = orient_euler(vs, start)
-                    print(tour)
                     if tour[0] != tour[-2]:
                         tour.pop(-1)
+                elif mode == 'ham':
+                    tour = hamilton_way(vs)
 
             if mode is None:
                 self.state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
+                self.hamilton_button = ttk.Button(text='Гамильтонов путь', command=lambda: self.build(mode='ham'))
                 if state == 'cycle':
                     self.euler_button = ttk.Button(self.window, text='Эйлеров цикл',
                                                    command=lambda: self.build(mode='cycle'))
@@ -149,12 +158,17 @@ class Main:
                     self.euler_entry = Entry(self.window, width=5)
                     self.euler_entry.place(x=620, y=457)
                     self.euler_entry.insert(0, '1')
+
+                    self.hamilton_button.place(x=550, y=490)
                 elif state == 'way':
                     self.euler_speech.destroy()
                     self.euler_entry.destroy()
                     self.euler_button = ttk.Button(self.window, text='Эйлеров путь',
                                                    command=lambda: self.build(mode='way'))
                     self.euler_button.place(x=550, y=440)
+                    self.hamilton_button.place(x=550, y=480)
+                else:
+                    self.hamilton_button.place(x=550, y=430)
 
             self.err_label.configure(text='Построение...', fg='black')
             self.canvas.destroy()
