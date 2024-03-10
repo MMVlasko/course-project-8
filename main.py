@@ -95,14 +95,14 @@ class Main:
                 msg += 'Введён неориентированный граф.\n\n'
                 nor = True
                 vs = list(set([tuple(sorted(i)) for i in vs]))
-                can = all(not sum(i) % 2 for i in data)
+                can = all(not sum(i) % 2 for i in data) and all(sum(i) for i in data)
                 if not can:
                     if sum(sum(i) % 2 for i in data) == 2:
                         start, end = [i + 1 for i in range(len(data)) if sum(data[i]) % 2]
                         msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
                         state = 'way'
                     else:
-                        msg += 'Невозможно построить Эйлеров цикл в данном графе!'
+                        msg += 'Невозможно построить Эйлеров\nцикл в данном графе!'
                         state = 'fail'
                 else:
                     state = 'cycle'
@@ -120,8 +120,11 @@ class Main:
             else:
                 msg += 'Введён ориентированный граф.\n\n'
                 can = all(sum(data[i]) == sum(data[j][i] for j in range(len(data))) for i in range(len(data)))
+
                 if not can:
-                    if sum((sum(data[i]) != sum(data[j][i] for j in range(len(data)))) for i in range(len(data))) == 2:
+                    if sum((sum(data[i]) != sum(data[j][i] for j in range(len(data)))) for i in range(len(data))) == 2 \
+                            and all(any(data[i]) and any(data[j][i] for j in range(len(data))) for i in
+                                    range(len(data))):
                         temp = [i + 1 for i in range(len(data)) if sum(data[i]) != sum(
                             data[j][i] for j in range(len(data)))]
                         start, end = temp if sum(data[temp[0] - 1]) else reversed(temp)
@@ -139,7 +142,8 @@ class Main:
                 elif mode == 'way':
                     vs += [(end, start)] if ((end, start) not in vs and (start, end) not in vs) else []
                     tour = orient_euler(vs, start)
-                    if tour[0] != tour[-2]:
+                    if tour[0] != tour[-2] and tour[-1] != end:
+                        print(tour[-1])
                         tour.pop(-1)
                 elif mode == 'ham':
                     tour = hamilton_way(vs)

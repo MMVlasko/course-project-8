@@ -16,5 +16,4 @@ def hamilton_way(graph):
     for i in permutations(_set):
         k += 1
         if recur_way([i[0]], i, graph):
-            print(k)
             return list(i)

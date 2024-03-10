@@ -1,4 +1,5 @@
 def not_orient_euler(graph, start, warn=(0, 0)):
+    print(graph)
     if len(graph) == 1:
         return list(graph[0]) + [graph[0][0]]
     stack, tour = [], []
@@ -27,6 +28,8 @@ def get_degree(v, graph):
 
 
 def get_edge_and_index(v, graph, warn):
+    print(v, warn)
     for i in range(len(graph)):
         if (v == graph[i][0] or v == graph[i][1]) and not (v == graph[i][0] and graph[i] == warn):
+            print(v, warn, i, graph[i])
             return i, graph[i]
