@@ -1,4 +1,5 @@
 def orient_euler(gr, start):
+    print(gr)
     stack, tour = [], []
 
     stack.append(start)
@@ -26,5 +27,7 @@ def get_degree(v, gr):
 
 def get_edge_and_index(v, gr):
     for i in range(len(gr)):
-        if v == gr[i][0]:
+        print(v, gr[i], gr[i] != gr[-1])
+        if v == gr[i][0] and gr[i] != gr[-1]:
             return i, gr[i]
+    return len(gr) - 1, gr[-1]

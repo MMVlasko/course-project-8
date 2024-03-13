@@ -1,5 +1,4 @@
-def not_orient_euler(graph, start, warn=(0, 0)):
-    print(graph)
+def not_orient_euler(graph, start, state, warn=(0, 0)):
     if len(graph) == 1:
         return list(graph[0]) + [graph[0][0]]
     stack, tour = [], []
@@ -13,9 +12,11 @@ def not_orient_euler(graph, start, warn=(0, 0)):
             stack.pop()
             tour.append(v)
         else:
-            index, edge = get_edge_and_index(v, graph, warn=warn)
+            index, edge = get_edge_and_index(v, graph, state, warn=warn)
             graph.pop(index)
             stack.append(edge[1] if v == edge[0] else edge[0])
+    if state:
+        return list(reversed(tour))
     return tour
 
 
@@ -27,9 +28,7 @@ def get_degree(v, graph):
     return degree
 
 
-def get_edge_and_index(v, graph, warn):
-    print(v, warn)
+def get_edge_and_index(v, graph, state, warn):
     for i in range(len(graph)):
-        if (v == graph[i][0] or v == graph[i][1]) and not (v == graph[i][0] and graph[i] == warn):
-            print(v, warn, i, graph[i])
+        if (v == graph[i][0] or v == graph[i][1]) and not (v == graph[i][0] and graph[i] == warn and not state):
             return i, graph[i]

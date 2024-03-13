@@ -9,6 +9,7 @@ from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
 from hamilton import hamilton_way
+from check import check_tour
 
 
 class Stop:
@@ -109,13 +110,15 @@ class Main:
 
                 if mode == 'cycle':
                     eu = int(self.euler_entry.get())
-                    tour = not_orient_euler(vs, eu if eu <= len(data) else 1)
+                    tour = not_orient_euler(vs, eu if eu <= len(data) else 1, state)
                 elif mode == 'way':
-                    vs = ([(end, start)] if (start, end) not in vs else []) + vs
-                    tour = not_orient_euler(vs, start, warn=(start, end))
-                    tour.pop(-1)
+                    state = (start, end) in vs
+                    vs = ([(end, start)] if not state else []) + vs
+                    tour = not_orient_euler(vs, start, state, warn=(start, end))
+                    if not state:
+                        tour.pop(-1)
                 elif mode == 'ham':
-                    tour = hamilton_way(vs)
+                    tour = hamilton_way(vs, False)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
@@ -127,7 +130,9 @@ class Main:
                                     range(len(data))):
                         temp = [i + 1 for i in range(len(data)) if sum(data[i]) != sum(
                             data[j][i] for j in range(len(data)))]
-                        start, end = temp if sum(data[temp[0] - 1]) else reversed(temp)
+                        vs += [tuple(temp)] if (tuple(temp) not in vs and tuple(temp) not in vs) else []
+                        temp_vs = vs.copy()
+                        start, end = temp if sum(data[temp[0] - 1]) and check_tour(orient_euler(temp_vs, temp[0]), vs) else reversed(temp)
                         msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
                         state = 'way'
                     else:
@@ -135,18 +140,15 @@ class Main:
                         msg += 'Невозможно построить Эйлеров\nцикл в данном орграфе!'
                 else:
                     state = 'cycle'
-
                 if mode == 'cycle':
                     eu = int(self.euler_entry.get())
                     tour = orient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
-                    vs += [(end, start)] if ((end, start) not in vs and (start, end) not in vs) else []
                     tour = orient_euler(vs, start)
                     if tour[0] != tour[-2] and tour[-1] != end:
-                        print(tour[-1])
                         tour.pop(-1)
                 elif mode == 'ham':
-                    tour = hamilton_way(vs)
+                    tour = hamilton_way(vs, True)
 
             if mode is None:
                 self.state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
