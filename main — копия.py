@@ -9,6 +9,9 @@ from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
 from hamilton import hamilton_way
+from check import check_tour
+from itertools import product
+from _tkinter import TclError
 
 
 class Stop:
@@ -18,7 +21,7 @@ class Stop:
 class Main:
     def __init__(self):
         self.window = Tk()
-        center_window(self.window, 765, 680)
+        center_window(self.window, 750, 680)
         self.window.title('Эйлеровы и Гамильтоновы пути (циклы)')
         self.window.protocol('WM_DELETE_WINDOW', self.close)
 
@@ -27,11 +30,11 @@ class Main:
         self.euler_entry = Entry()
         self.hamilton_button = Entry()
 
-        self.canvas = Canvas(master=self.window, width=525, height=640)
+        self.canvas = Canvas(master=self.window, width=500, height=640)
         self.canvas.place(x=20, y=20)
 
         self.text = Text(width=22, height=10)
-        self.text.place(x=560, y=90)
+        self.text.place(x=550, y=90)
         self.stop = Stop()
 
         if os.path.exists('dump.txt'):
@@ -41,29 +44,29 @@ class Main:
             self.text.insert(0.0, '0 1\n1 0')
 
         self.var = BooleanVar()
-        ttk.Checkbutton(self.window, text='Визуализировать при анализе', variable=self.var).place(x=560, y=265)
+        ttk.Checkbutton(self.window, text='Визуализировать при анализе', variable=self.var).place(x=550, y=265)
 
-        ttk.Button(self.window, text='Анализ', command=self.build).place(x=560, y=300)
-        ttk.Button(self.window, text='СТОП', command=self.abort).place(x=560, y=20)
-        ttk.Button(self.window, text='Справка').place(x=665, y=20)
+        ttk.Button(self.window, text='Анализ', command=self.build).place(x=550, y=300)
+        ttk.Button(self.window, text='СТОП', command=self.abort).place(x=550, y=20)
+        ttk.Button(self.window, text='Справка').place(x=655, y=20)
 
         self.err_label = Label(self.window)
-        self.err_label.place(x=650, y=300)
+        self.err_label.place(x=640, y=300)
 
         self.state_label = Label(self.window, justify='left')
-        self.state_label.place(x=560, y=340)
+        self.state_label.place(x=550, y=340)
 
-        Label(self.window, text='Скорость:').place(x=560, y=55)
+        Label(self.window, text='Скорость:').place(x=550, y=55)
 
         self.speed = Entry(self.window, width=17)
-        self.speed.place(x=635, y=55)
+        self.speed.place(x=625, y=55)
         self.speed.insert(0, '0')
 
         d = RawTurtle(self.canvas)
         d.hideturtle()
         d.write('GRAPH\'S VISUALISATION WELCOME YOU!', align='center')
 
-    def build(self, mode=None):
+    def build(self, mode=None, data=None):
         if mode is None:
             self.euler_button.destroy()
             self.euler_speech.destroy()
@@ -71,7 +74,6 @@ class Main:
             self.hamilton_button.destroy()
 
         try:
-            data = [list(map(int, i.split())) for i in self.text.get(0.0, 'end').split('\n') if i]
             length = range(len(data))
 
             if not all(len(i) == len(data[0]) for i in data):
@@ -82,7 +84,7 @@ class Main:
             if any(data[i][i] for i in length):
                 self.err_label.configure(text='Ошибка!', fg='red')
                 self.state_label.configure(text='Некорректный вид матрицы\nсмежности!')
-                return
+                return False, False
 
             tour, msg, vs, nor = [], '', [], False
             start = end = None
@@ -101,24 +103,28 @@ class Main:
                     if sum(sum(i) % 2 for i in data) == 2:
                         start, end = [i + 1 for i in length if sum(data[i]) % 2]
                         msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
+                        if mode is None:
+                            return 'way', False
                         state = 'way'
                     else:
                         msg += 'Невозможно построить Эйлеров\nцикл в данном графе!'
                         state = 'fail'
+                elif mode is None:
+                    return 'cycle', False
                 else:
                     state = 'cycle'
-
                 if mode == 'cycle':
-                    eu = int(self.euler_entry.get())
-                    tour = not_orient_euler(vs, eu if eu <= len(data) else 1, state)
+                    eu = int(1)
+                    return not_orient_euler(vs, eu if eu <= len(data) else 1, state)
                 elif mode == 'way':
                     state = (start, end) in vs
                     vs = ([(end, start)] if not state else []) + vs
                     tour = not_orient_euler(vs, start, state, warn=(start, end))
                     if not state:
                         tour.pop(-1)
+                    return tour
                 elif mode == 'ham':
-                    tour = hamilton_way(vs, False)
+                   return hamilton_way(vs, False)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
@@ -131,32 +137,32 @@ class Main:
                         temp = [i + 1 for i in length if sum(data[i]) != sum(
                             data[j][i] for j in length)]
                         vs += [tuple(temp)] if tuple(temp) not in vs or tuple(reversed(temp)) not in vs else []
-                        start, end = temp if sum(data[temp[0] - 1]) > sum(data[i][temp[0] - 1] for i in length
-                                                                          ) else reversed(temp)
+                        start, end = temp if sum(data[temp[0] - 1]) > sum(data[i][temp[0] - 1] for i in length) else reversed(temp)
                         if sum(data[start - 1]) - sum(data[i][start - 1] for i in length) == 1 and sum(
                                 data[end - 1]) - sum(data[i][end - 1] for i in length) == -1:
                             msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
+                            if mode is None:
+                                return 'way', True
                             state = 'way'
                         else:
                             state = 'fail'
                             msg += 'Невозможно построить Эйлеров\nцикл в данном орграфе!'
+
                     else:
                         state = 'fail'
                         msg += 'Невозможно построить Эйлеров\nцикл в данном орграфе!'
-                else:
-                    state = 'cycle'
+                elif mode is None:
+                    return 'cycle', False
                 if mode == 'cycle':
                     eu = int(self.euler_entry.get())
-                    tour = orient_euler(vs, eu if eu <= len(data) else 1)
-                    if tour[-1] != tour[0]:
-                        tour.append(tour[0])
+                    return orient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
                     tour = orient_euler(vs, start)
                     if tour[0] != tour[-2] and tour[-1] != end:
                         tour.pop(-1)
+                    return tour
                 elif mode == 'ham':
-                    tour = hamilton_way(vs, True)
-
+                    return hamilton_way(vs, True)
             if mode is None:
                 self.state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
                 self.hamilton_button = ttk.Button(text='Гамильтонов путь', command=lambda: self.build(mode='ham'))
@@ -164,41 +170,45 @@ class Main:
                     hamilton = hamilton_way(vs, True) and all(any(i) for i in data) and all(
                         any(data[j][i] for j in length) for i in length)
                 except IndexError:
-                    return
+                    return 'fuck'
                 if state == 'cycle':
                     self.euler_button = ttk.Button(self.window, text='Эйлеров цикл',
                                                    command=lambda: self.build(mode='cycle'))
-                    self.euler_button.place(x=560, y=400)
+                    self.euler_button.place(x=550, y=400)
 
                     self.euler_speech = Label(text='Начать Эйлеров цикл\n\nс вершины              .', justify='left')
-                    self.euler_speech.place(x=560, y=430)
+                    self.euler_speech.place(x=550, y=430)
 
                     self.euler_entry = Entry(self.window, width=5)
-                    self.euler_entry.place(x=630, y=457)
+                    self.euler_entry.place(x=620, y=457)
                     self.euler_entry.insert(0, '1')
                     if hamilton:
-                        self.hamilton_button.place(x=560, y=490)
+                        self.hamilton_button.place(x=550, y=490)
+                    return 'cycle'
                 elif state == 'way':
                     self.euler_speech.destroy()
                     self.euler_entry.destroy()
                     self.euler_button = ttk.Button(self.window, text='Эйлеров путь',
                                                    command=lambda: self.build(mode='way'))
-                    self.euler_button.place(x=560, y=440)
+                    self.euler_button.place(x=550, y=440)
                     if hamilton:
-                        self.hamilton_button.place(x=560, y=480)
+                        self.hamilton_button.place(x=550, y=480)
+                    return 'way'
                 elif hamilton:
-                    self.hamilton_button.place(x=560, y=430)
+                    return 'ham'
+                    self.hamilton_button.place(x=550, y=430)
+                else:
+                    return False, False
 
             self.err_label.configure(text='Построение...', fg='black')
             self.canvas.destroy()
-            canvas = Canvas(master=self.window, width=525, height=640)
+            canvas = Canvas(master=self.window, width=500, height=640)
             canvas.place(x=20, y=20)
             draw = RawTurtle(canvas)
             draw.hideturtle()
             draw.speed(int(self.speed.get()))
             draw.penup()
             draw.left(90)
-            delta = 0
             if mode is not None:
                 draw.forward(290)
                 draw.write(
@@ -207,19 +217,15 @@ class Main:
                     font=('Times New Roman', 14, 'bold'),
                     align='center'
                 )
-                text = ' - '.join(map(str, tour))
-                if len(text) > 72:
-                    text = text[:72] + '\n' + text[72:]
-                    delta = 20
-                draw.back(40 + delta)
+                draw.back(30)
                 draw.write(
-                    text,
+                    ' - '.join(map(str, tour)),
                     False,
                     font=('Times New Roman', 14, 'bold'),
                     align='center'
                 )
                 tour = [(tour[i], tour[i + 1]) for i in range(len(tour) - 1)]
-                draw.back(70 - delta)
+                draw.back(70)
             else:
                 draw.forward(190)
             draw.left(90)
@@ -228,8 +234,8 @@ class Main:
             draw.pendown()
             draw.pensize(3)
             self.stop.stop = False
-            if mode is not None or self.var.get():
-                graph(data, base=draw, stop=self.stop, tour=tour, nor=not nor)
+            # if mode is not None or self.var.get():
+            #     graph(data, base=draw, stop=self.stop, tour=tour, nor=not nor)
             if not self.stop.stop:
                 self.err_label.configure(text='Завершено.', fg='green')
         except ValueError:
@@ -249,4 +255,30 @@ class Main:
 
 if __name__ == '__main__':
     app = Main()
-    app.window.mainloop()
+    a = 4
+    m = []
+    k = 0
+    for i in product((1, 0), repeat=a):
+        m.append(list(i))
+    for i in product(m, repeat=a):
+        if i[0][0] == 1 or i[-1][-1] == 1:
+            continue
+        try:
+            vs = []
+            for c in range(a):
+                for d in range(a):
+                    if i[c][d]:
+                        vs.append((c + 1, d + 1))
+            mmm = app.build(data=list(i))
+
+            if not mmm[0]:
+                continue
+            t = app.build(data=list(i), mode=mmm[0])
+            if not check_tour(t, vs, mmm[1]):
+                k += 1
+                print(i, mmm, t, vs)
+        except (TypeError, TclError):
+            pass
+        except Exception as e:
+            print(i, e)
+    print(k)
