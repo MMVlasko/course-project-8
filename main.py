@@ -85,7 +85,7 @@ class Main:
                 return
 
             tour, msg, vs, nor = [], '', [], False
-            start = end = None
+            start = end = temp = None
 
             for i in length:
                 for j in length:
@@ -118,21 +118,25 @@ class Main:
                     if not state:
                         tour.pop(-1)
                 elif mode == 'ham':
-                    tour = hamilton_way(vs, False)
+                    tour = hamilton_way(vs.copy(), False)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
                 can = all(sum(data[i]) == sum(data[j][i] for j in length) for i in length)
 
                 if not can:
+                    print(sum((sum(data[i]) != sum(data[j][i] for j in length)) for i in length) == 2
+                          and all(any(data[i]) or any(data[j][i] for j in length) for i in length))
                     if sum((sum(data[i]) != sum(data[j][i] for j in length)) for i in length) == 2 \
-                            and all(any(data[i]) and any(data[j][i] for j in length) for i in
+                            and all(any(data[i]) or any(data[j][i] for j in length) for i in
                                     length):
                         temp = [i + 1 for i in length if sum(data[i]) != sum(
                             data[j][i] for j in length)]
-                        vs += [tuple(temp)] if tuple(temp) not in vs or tuple(reversed(temp)) not in vs else []
+
                         start, end = temp if sum(data[temp[0] - 1]) > sum(data[i][temp[0] - 1] for i in length
                                                                           ) else reversed(temp)
+                        print(sum(data[start - 1]) - sum(data[i][start - 1] for i in length), sum(data[end - 1]) - sum(
+                            data[i][end - 1] for i in length))
                         if sum(data[start - 1]) - sum(data[i][start - 1] for i in length) == 1 and sum(
                                 data[end - 1]) - sum(data[i][end - 1] for i in length) == -1:
                             msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
@@ -151,18 +155,21 @@ class Main:
                     if tour[-1] != tour[0]:
                         tour.append(tour[0])
                 elif mode == 'way':
+                    vs += [tuple(temp)] if tuple(temp) not in vs or tuple(reversed(temp)) not in vs else []
                     tour = orient_euler(vs, start)
                     if tour[0] != tour[-2] and tour[-1] != end:
                         tour.pop(-1)
+                    if tour[-1] != end:
+                        tour.append(end)
                 elif mode == 'ham':
-                    tour = hamilton_way(vs, True)
+                    tour = hamilton_way(vs.copy(), True)
 
             if mode is None:
                 self.state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
                 self.hamilton_button = ttk.Button(text='Гамильтонов путь', command=lambda: self.build(mode='ham'))
                 try:
-                    hamilton = hamilton_way(vs, True) and all(any(i) for i in data) and all(
-                        any(data[j][i] for j in length) for i in length)
+                    hamilton = hamilton_way(vs.copy(), not nor) and (all(sum(data[i]) or sum(
+                        data[j][i] for j in length) for i in length))
                 except IndexError:
                     return
                 if state == 'cycle':

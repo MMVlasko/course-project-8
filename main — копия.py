@@ -273,7 +273,7 @@ if __name__ == '__main__':
 
             if not mmm[0]:
                 continue
-            t = app.build(data=list(i), mode=mmm[0])
+            t = app.build(data=list(i), mode='ham')
             if not check_tour(t, vs, mmm[1]):
                 k += 1
                 print(i, mmm, t, vs)
