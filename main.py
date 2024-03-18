@@ -8,7 +8,7 @@ import os.path
 from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
-from hamilton import hamilton_way
+from hamilton import hamilton_way, hamilton_cycle
 
 
 class Stop:
@@ -26,6 +26,7 @@ class Main:
         self.euler_speech = Entry()
         self.euler_entry = Entry()
         self.hamilton_button = Entry()
+        self.ham_cycle_button = Entry()
 
         self.canvas = Canvas(master=self.window, width=525, height=640)
         self.canvas.place(x=20, y=20)
@@ -63,12 +64,19 @@ class Main:
         d.hideturtle()
         d.write('GRAPH\'S VISUALISATION WELCOME YOU!', align='center')
 
+        self.memory = None
+
     def build(self, mode=None):
+        if mode is not None and self.memory != self.text.get(1.0, 'end'):
+            self.build()
+            return
+        self.memory = self.text.get(1.0, 'end')
         if mode is None:
             self.euler_button.destroy()
             self.euler_speech.destroy()
             self.euler_entry.destroy()
             self.hamilton_button.destroy()
+            self.ham_cycle_button.destroy()
 
         try:
             data = [list(map(int, i.split())) for i in self.text.get(0.0, 'end').split('\n') if i]
@@ -119,6 +127,8 @@ class Main:
                         tour.pop(-1)
                 elif mode == 'ham':
                     tour = hamilton_way(vs.copy(), False)
+                elif mode == 'hac':
+                    tour = hamilton_cycle(vs.copy(), False)
 
             else:
                 msg += 'Введён ориентированный граф.\n\n'
@@ -163,15 +173,22 @@ class Main:
                         tour.append(end)
                 elif mode == 'ham':
                     tour = hamilton_way(vs.copy(), True)
+                elif mode == 'hac':
+                    tour = hamilton_cycle(vs.copy(), True)
 
             if mode is None:
                 self.state_label.configure(text=f'{msg}{"Построить:" * (state != "fail")}')
                 self.hamilton_button = ttk.Button(text='Гамильтонов путь', command=lambda: self.build(mode='ham'))
+                self.ham_cycle_button = ttk.Button(text='Гамильтонов цикл', command=lambda: self.build(mode='hac'))
                 try:
                     hamilton = hamilton_way(vs.copy(), not nor) and (all(sum(data[i]) or sum(
                         data[j][i] for j in length) for i in length))
                 except IndexError:
                     return
+                try:
+                    cycle = hamilton and hamilton_cycle(vs.copy(), not nor)
+                except IndexError:
+                    cycle = False
                 if state == 'cycle':
                     self.euler_button = ttk.Button(self.window, text='Эйлеров цикл',
                                                    command=lambda: self.build(mode='cycle'))
@@ -185,6 +202,8 @@ class Main:
                     self.euler_entry.insert(0, '1')
                     if hamilton:
                         self.hamilton_button.place(x=560, y=490)
+                    if cycle:
+                        self.ham_cycle_button.place(x=560, y=530)
                 elif state == 'way':
                     self.euler_speech.destroy()
                     self.euler_entry.destroy()
@@ -193,9 +212,12 @@ class Main:
                     self.euler_button.place(x=560, y=440)
                     if hamilton:
                         self.hamilton_button.place(x=560, y=480)
+                    if cycle:
+                        self.ham_cycle_button.place(x=560, y=520)
                 elif hamilton:
                     self.hamilton_button.place(x=560, y=430)
-
+                    if cycle:
+                        self.ham_cycle_button.place(x=560, y=470)
             self.err_label.configure(text='Построение...', fg='black')
             self.canvas.destroy()
             canvas = Canvas(master=self.window, width=525, height=640)
