@@ -158,6 +158,11 @@ class Main:
                     return orient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
                     tour = orient_euler(vs, start)
+                    # if not check_tour(tour, t, True):
+                    #     if (start, end) in t:
+                    #         t.remove((start, end))
+                    #         tour = orient_euler(t, start)
+                    #         tour.append(end)
                     if tour[0] != tour[-2] and tour[-1] != end:
                         tour.pop(-1)
                     return tour
@@ -273,7 +278,7 @@ if __name__ == '__main__':
 
             if not mmm[0]:
                 continue
-            t = app.build(data=list(i), mode='ham')
+            t = app.build(data=list(i), mode=mmm[0])
             if not check_tour(t, vs, mmm[1]):
                 k += 1
                 print(i, mmm, t, vs)

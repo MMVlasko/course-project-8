@@ -4,11 +4,13 @@ from tkinter import (
     Text, Label, ttk, BooleanVar
 )
 import os.path
+from json import load
 
 from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
 from hamilton import hamilton_way, hamilton_cycle
+from check import check_tour
 
 
 class Stop:
@@ -135,8 +137,6 @@ class Main:
                 can = all(sum(data[i]) == sum(data[j][i] for j in length) for i in length)
 
                 if not can:
-                    print(sum((sum(data[i]) != sum(data[j][i] for j in length)) for i in length) == 2
-                          and all(any(data[i]) or any(data[j][i] for j in length) for i in length))
                     if sum((sum(data[i]) != sum(data[j][i] for j in length)) for i in length) == 2 \
                             and all(any(data[i]) or any(data[j][i] for j in length) for i in
                                     length):
@@ -145,8 +145,6 @@ class Main:
 
                         start, end = temp if sum(data[temp[0] - 1]) > sum(data[i][temp[0] - 1] for i in length
                                                                           ) else reversed(temp)
-                        print(sum(data[start - 1]) - sum(data[i][start - 1] for i in length), sum(data[end - 1]) - sum(
-                            data[i][end - 1] for i in length))
                         if sum(data[start - 1]) - sum(data[i][start - 1] for i in length) == 1 and sum(
                                 data[end - 1]) - sum(data[i][end - 1] for i in length) == -1:
                             msg += f'В данном графе существует\nЭйлеров путь из {start} в {end}.\n\n'
@@ -165,8 +163,13 @@ class Main:
                     if tour[-1] != tour[0]:
                         tour.append(tour[0])
                 elif mode == 'way':
+                    t = vs.copy()
                     vs += [tuple(temp)] if tuple(temp) not in vs or tuple(reversed(temp)) not in vs else []
                     tour = orient_euler(vs, start)
+                    if not check_tour(tour, t, True):
+                        if (start, end) in vs:
+                            with open('patterns.json', 'rb') as f:
+                                tour = load(f)[str(data)]
                     if tour[0] != tour[-2] and tour[-1] != end:
                         tour.pop(-1)
                     if tour[-1] != end:
