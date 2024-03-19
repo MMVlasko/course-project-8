@@ -11,36 +11,38 @@ def orient_euler(gr, start):
 
 
 def _orient_euler(gr, start):
-    stack, tour = [], []
+    stack, tour = [start], []
 
-    stack.append(start)
     while len(stack) > 0:
         v = stack[-1]
-        degree = get_degree(v, gr)
 
-        if not degree:
+        if not get_degree(v, gr):
             stack.pop()
             tour.append(v)
+
         else:
             index, edge = get_edge_and_index(v, gr, False)
             gr.pop(index)
             stack.append(edge[1])
+
     return list(reversed(tour))
 
 
 def special_euler(gr, start, last=False):
-    stack = [start]
-    tour = []
+    stack, tour = [start], []
+
     while len(stack):
         v = stack[-1]
-        degree = get_degree(v, gr)
-        if degree:
+
+        if get_degree(v, gr):
             ind = get_edge_and_index(v, gr.copy(), True, last=last)[0]
             stack.append(gr[ind][1])
             gr.pop(ind)
+
         else:
             tour.append(stack[-1])
             stack.pop(-1)
+
     return list(reversed(tour))
 
 
@@ -61,6 +63,7 @@ def get_edge_and_index(v, gr, spec, last=False):
                     temp.remove((gr[i][1], v))
                 if get_degree(gr[i][1], temp):
                     return i, gr[i]
+
             else:
                 if spec:
                     temp = gr.copy()
@@ -68,6 +71,7 @@ def get_edge_and_index(v, gr, spec, last=False):
                         temp.remove((gr[i][1], v))
                     if get_degree(gr[i][1], temp):
                         return i, gr[i]
+
                 else:
                     return i, gr[i]
 

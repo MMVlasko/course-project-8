@@ -1,20 +1,20 @@
 def not_orient_euler(graph, start, state, warn=(0, 0)):
     if len(graph) == 1:
         return list(graph[0]) + [graph[0][0]]
-    stack, tour = [], []
-    stack.append(start)
+
+    stack, tour = [start], []
 
     while len(stack) > 0:
         v = stack[-1]
-        degree = get_degree(v, graph)
 
-        if not degree:
+        if not get_degree(v, graph):
             stack.pop()
             tour.append(v)
         else:
             index, edge = get_edge_and_index(v, graph, state, warn=warn)
             graph.pop(index)
             stack.append(edge[1] if v == edge[0] else edge[0])
+
     if state:
         return list(reversed(tour))
     return tour

@@ -41,23 +41,27 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
     base.circle(20)
     if draw:
         base.end_fill()
+
     base.left(90)
     base.penup()
     base.forward(8)
     base.left(90)
     base.forward(4)
     base.color(fg)
+
     if draw:
         base.write(
             str(n),
             False,
             font=('Times New Roman', 17, 'bold')
         )
+
     base.color(bg)
     base.right(180)
     base.forward(4)
     base.left(90)
     base.forward(12)
+
     if step is not None:
         if step[0] == 'l':
             base.left(90)
@@ -67,6 +71,7 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
             base.right(90)
             base.forward(30)
             base.left(90)
+
         base.color('red')
         base.write(
             ', '.join(step[1]),
@@ -75,6 +80,7 @@ def peak(n, bg='black', fg='white', out=0.0, inp=0.0, end='down', draw=1, base=N
             align='right' if step[0] == 'l' else 'left'
         )
         base.color(bg)
+
         if step[0] == 'r':
             base.left(90)
             base.forward(30)
@@ -102,6 +108,7 @@ def graph(data, base=None, stop=None, tour=None, nor=None):
     for item in range(number):
         if stop.stop:
             return
+
         inp = None
         if item % 4 in (0, 2):
             inp = 180
@@ -109,17 +116,18 @@ def graph(data, base=None, stop=None, tour=None, nor=None):
             inp = 270
         elif item % 4 == 3:
             inp = 90
+
         marks = [str(i + 1) for i in range(len(tour)) if tour[i][0] == item + 1]
         peak(item + 1, inp=inp if item else 0, end='up', out=0, draw=graphs[item], base=base,
              step=('l' if item % 4 in (0, 3) else 'r',
                    marks + ([str(len(tour) + 1)] if item + 1 == tour[-1][1] else []) if tour else []))
 
         for pk in range(number):
-
             color = ('black', 'red')[int((item + 1, pk + 1) in tour)]
 
             if stop.stop:
                 return
+
             if data[item][pk]:
                 place = (pk + 1) // 2 + (0 if pk % 2 else 1)
                 now_place = (item + 1) // 2 + (0 if item % 2 else 1)
@@ -230,6 +238,7 @@ def graph(data, base=None, stop=None, tour=None, nor=None):
                     angle = degrees(asin((abs(delta) * 190) / ((abs(delta) * 190) ** 2 + 190 ** 2) ** 0.5))
                     base.left(180)
                     base.forward(20)
+
                     if delta > 0 and item % 4 in (0, 3):
                         base.right(90 + angle)
                     elif delta > 0 and item % 4 in (1, 2):
@@ -238,11 +247,13 @@ def graph(data, base=None, stop=None, tour=None, nor=None):
                         base.right(90 - angle)
                     elif delta < 0 and item % 4 in (1, 2):
                         base.left(90 - angle)
+
                     base.forward(20)
                     if p():
                         base.pendown()
                     base.forward(int(((abs(delta) * 160) ** 2 + 160 ** 2) ** 0.5 - 40))
                     pointer(base=base, col=color, draw=nor or color == 'red')
+
                     if delta > 0 and item % 4 in (0, 3):
                         peak(pk + 1, inp=270 - angle, out=270 - angle, draw=graphs[pk], base=base)
                     elif delta > 0 and item % 4 in (1, 2):
