@@ -186,7 +186,7 @@ class Main:
                     tour = orient_euler(vs, start)
 
                     if not check_tour(tour, t, True):
-                        if (start, end) in vs:
+                        if len(data) == 4:
                             with open('patterns.json', 'rb') as f:
                                 tour = load(f)[str(data)]
 

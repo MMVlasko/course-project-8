@@ -4,7 +4,7 @@ from tkinter import (
     Text, Label, ttk, BooleanVar
 )
 import os.path
-
+from json import load
 from graph import not_orient_euler
 from orgraph import orient_euler
 from visualisation import graph, center_window
@@ -157,12 +157,12 @@ class Main:
                     eu = int(self.euler_entry.get())
                     return orient_euler(vs, eu if eu <= len(data) else 1)
                 elif mode == 'way':
+                    t = vs.copy()
                     tour = orient_euler(vs, start)
-                    # if not check_tour(tour, t, True):
-                    #     if (start, end) in t:
-                    #         t.remove((start, end))
-                    #         tour = orient_euler(t, start)
-                    #         tour.append(end)
+                    if not check_tour(tour, t, True):
+                        if len(data) == 4:
+                            with open('patterns.json', 'rb') as f:
+                                tour = load(f)[str(data)]
                     if tour[0] != tour[-2] and tour[-1] != end:
                         tour.pop(-1)
                     return tour
@@ -260,15 +260,18 @@ class Main:
 
 if __name__ == '__main__':
     app = Main()
-    a = 4
+    a = 5
     m = []
     k = 0
+    z = 0
     for i in product((1, 0), repeat=a):
         m.append(list(i))
     for i in product(m, repeat=a):
         if i[0][0] == 1 or i[-1][-1] == 1:
             continue
+
         try:
+            # z += 1
             vs = []
             for c in range(a):
                 for d in range(a):
@@ -279,9 +282,11 @@ if __name__ == '__main__':
             if not mmm[0]:
                 continue
             t = app.build(data=list(i), mode=mmm[0])
+            if mmm == ('way', True):
+                z += 1
             if not check_tour(t, vs, mmm[1]):
                 k += 1
-                print(i, mmm, t, vs)
+                print(z, i, mmm, t, vs)
         except (TypeError, TclError):
             pass
         except Exception as e:
