@@ -184,9 +184,6 @@ class Main:
                     self.euler_speech = Label(text='Начать Эйлеров цикл\n\nс вершины              .', justify='left')
                     self.euler_speech.place(x=550, y=430)
 
-                    self.euler_entry = Entry(self.window, width=5)
-                    self.euler_entry.place(x=620, y=457)
-                    self.euler_entry.insert(0, '1')
                     if hamilton:
                         self.hamilton_button.place(x=550, y=490)
                     return 'cycle'
