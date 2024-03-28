@@ -274,6 +274,7 @@ def graph(data, base=None, stop=None, tour=None, nor=None):
                     elif delta < 0 and item % 4 in (1, 2):
                         base.right(90 - angle)
                     base.forward(20)
+
                 memory.append({item, pk})
                 graphs[pk] = 0
 

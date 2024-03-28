@@ -3,6 +3,7 @@ from tkinter import (
     Tk, Entry, Canvas,
     Text, Label, ttk, BooleanVar
 )
+
 from tkinter.messagebox import showinfo
 import os.path
 from json import load

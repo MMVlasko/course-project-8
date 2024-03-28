@@ -49,6 +49,7 @@ def hamilton_cycle(graph, orient):
                 vs.append(j[1] if j[0] == i else j[0])
 
         t = hamilton_way(graph.copy(), orient, cycle=i, _set=sorted(vs))
+
         if t:
             return [i] + t
 

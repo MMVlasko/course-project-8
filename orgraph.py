@@ -51,6 +51,7 @@ def get_degree(v, gr):
     for (x, y) in gr:
         if v == x:
             degree += 1
+
     return degree
 
 
